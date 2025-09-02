@@ -23,6 +23,7 @@ techniques:
           lights: { value: [-1, 0.5, 0.1, 0.05]}
           lightSectors: { value: [-1, 0.5, 0.1, 0.05]}
           occluders: { value: [0.0, 0.0, 0.0, 0.0]}
+          lightShadow: { value: [0.0, 0.0, 0.0, 0.0]}
 }%
 
 CCProgram lightScene-vs %{
@@ -61,6 +62,7 @@ uniform sampler2D mainTexture;
 
 uniform Constant {
   vec4 lights[light_max_num]; // 点光源 xy=圆心位置 z=半径 w=向外渐变距离
+  vec4 lightShadow[lightSector_max_num]; // 点光源是否产生阴影
   vec4 lightSectors[lightSector_max_num*2]; // 扇形光源
   vec4 occluders[occluder_max_num]; // 遮挡线段 
   float wh_ratio;
@@ -151,8 +153,11 @@ vec4 frag() {
       break;
     }
     bool isCross = false;
+    
     #if CALC_OCCLUDER //计算遮挡物
-      isCross = isLightOccluder(lights[c_i].xy);
+      if (lightShadow[c_i].x > 0.5) {
+        isCross = isLightOccluder(lights[c_i].xy);
+      }
     #endif
 
     if (!isCross) {
@@ -190,7 +195,9 @@ vec4 frag() {
 
     bool isCross = false;
     #if CALC_OCCLUDER //计算遮挡物
-      isCross = isLightOccluder(vS1.xy);
+      if (vS1.w > 0.5) {
+        isCross = isLightOccluder(vS1.xy);
+      }
     #endif
 
     if (!isCross) {

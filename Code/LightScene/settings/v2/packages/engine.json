@@ -104,7 +104,7 @@
             "_value": false
           },
           "profiler": {
-            "_value": false
+            "_value": true
           },
           "occlusion-query": {
             "_value": false
@@ -203,6 +203,7 @@
           "intersection-2d",
           "mask",
           "physics-2d-builtin",
+          "profiler",
           "rich-text",
           "sorting-2d",
           "ui"

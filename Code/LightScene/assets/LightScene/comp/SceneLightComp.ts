@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, NodeEventType } from 'cc';
+import { _decorator, CCBoolean, CCFloat, Component, NodeEventType } from 'cc';
 import { SceneLightMgr } from './SceneLightMgr';
 const { ccclass, property } = _decorator;
 
@@ -13,10 +13,13 @@ export class SceneLightComp extends Component {
     @property({type:CCFloat, tooltip: '外扩宽度'})
     outLen: number = 30;
 
+    @property({tooltip: '是否生成阴影'})
+    isShadow: boolean = false;
+
     public onUpdatePos() {
         if (!this.node.active) return;
         
-        SceneLightMgr.addLightPos(this.node.uuid, this.node.worldPosition, this.radius, this.outLen);
+        SceneLightMgr.addLightPos(this.node.uuid, this.node.worldPosition, this.radius, this.outLen, this.isShadow);
     }
 
     private _timer = null;

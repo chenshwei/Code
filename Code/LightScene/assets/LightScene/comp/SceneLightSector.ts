@@ -1,4 +1,4 @@
-import { _decorator, CCFloat, Component, NodeEventType } from 'cc';
+import { _decorator, CCBoolean, CCFloat, Component, NodeEventType } from 'cc';
 import { SceneLightMgr } from './SceneLightMgr';
 const { ccclass, property } = _decorator;
 
@@ -17,6 +17,8 @@ export class SceneLightSector extends Component {
     private _angle: number = 90;
     @property({ serializable: true })
     private _angleEx: number = 10;
+    @property({ serializable: true })
+    private _isShadow: boolean = false;
 
     @property({type:CCFloat, tooltip: '朝向 (0-360)'})
     get direction(): number {
@@ -61,7 +63,6 @@ export class SceneLightSector extends Component {
             this.onUpdatePos();
         }
     }
-    
 
     @property({type:CCFloat, tooltip: '外拓角度'})
     get angleEx(): number {
@@ -74,11 +75,22 @@ export class SceneLightSector extends Component {
         }
     }
 
+    @property({type:CCBoolean, tooltip: '是否产生阴影'})
+    get isShadow(): boolean {
+        return this._isShadow;
+    }
+    set isShadow(value: boolean) {
+        if (this._isShadow !== value) {
+            this._isShadow = value;
+            this.onUpdatePos();
+        }
+    }
+
     public onUpdatePos() {
         if (!this.node.active) return;
         
         SceneLightMgr.addLightSector(this.node.uuid, this.node.worldPosition, this._direction, this.radius
-            , this.outerWidth, this.angle, this.angleEx);
+            , this.outerWidth, this.angle, this.angleEx, this.isShadow);
     }
 
     private _timer = null;

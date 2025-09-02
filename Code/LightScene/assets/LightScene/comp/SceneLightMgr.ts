@@ -35,12 +35,13 @@ export class SceneLightMgr  {
 
 
     //#region 光源部分-点光源
-    static addLightPos(uuid: string, pos: Vec3, radius: number, outLen: number) {
+    static lightShadow: {} = {}
+    static addLightPos(uuid: string, pos: Vec3, radius: number, outLen: number, isShadow: boolean = false) {
         // if (!this.camera) return;
         let screenPos = this.camera.worldToScreen(pos);
 
         this.lightPosList[uuid] = new Vec4(this.radio*screenPos.x/this.width, 1-this.radio*screenPos.y/this.height, radius/this.width, outLen/this.width);
-        // this.lightPosList[uuid] = new Vec4(0.5+screenPos.x/this.width, 0.5-screenPos.y/this.height, radius/this.width, outLen/this.width);
+        this.lightShadow[uuid] = new Vec4(isShadow ? 1 : 0, 0, 0, 0);
         this.updateMaterial();
     }
 
@@ -52,12 +53,15 @@ export class SceneLightMgr  {
     static updateMaterial() {
         if (this.material) {
             let newArr = [];
+            let shadowArr = [];
             for (const key in this.lightPosList) {
                 const element = this.lightPosList[key];
                 newArr.push(element);
+                shadowArr.push(this.lightShadow[key]);
             }
             newArr.push(new Vec4(-1));
             this.material.setProperty("lights", newArr);
+            this.material.setProperty("lightShadow", shadowArr);
         }
     }
     //#endregion 光源部分-点光源
@@ -74,11 +78,12 @@ export class SceneLightMgr  {
      * @param angle 张开角度
      * @param angleEx 外拓角度 // 先不管这个
      */
-    static addLightSector(uuid: string, pos: Vec3, direction: number, radius: number, outerWidth: number, angle: number, angleEx: number) {
+    static addLightSector(uuid: string, pos: Vec3, direction: number, radius: number, outerWidth: number, 
+        angle: number, angleEx: number, isShadow: boolean = false) {
         if (!this.camera) return;
         let screenPos = this.camera.worldToScreen(pos);
         this.lightSectorList[uuid] = [
-            new Vec4(this.radio*screenPos.x/this.width, 1-this.radio*screenPos.y/this.height, direction, 0),
+            new Vec4(this.radio*screenPos.x/this.width, 1-this.radio*screenPos.y/this.height, direction, isShadow ? 1 : 0),
             new Vec4(radius/this.width, outerWidth/this.height, angle, angleEx),
         ];
         this.updateMatSector();
