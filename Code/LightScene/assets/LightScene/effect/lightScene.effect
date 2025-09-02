@@ -55,8 +55,8 @@ in vec4 v_color;
 
 uniform sampler2D mainTexture;
 
-#pragma define light_max_num 30 //光源最大数量
-#pragma define lightSector_max_num 30 //光源最大数量
+#pragma define light_max_num 30 //点光源最大数量
+#pragma define lightSector_max_num 30 //扇形光源最大数量
 #pragma define occluder_max_num 200 //遮挡物数据列表最大长度
 #pragma define PI 3.14159265359
 
@@ -152,29 +152,31 @@ vec4 frag() {
     if (lights[c_i].x <= -1.0) {
       break;
     }
-    bool isCross = false;
-    
-    #if CALC_OCCLUDER //计算遮挡物
-      if (lightShadow[c_i].x > 0.5) {
-        isCross = isLightOccluder(lights[c_i].xy);
-      }
-    #endif
 
-    if (!isCross) {
-      vec2 v2 = v_uv - lights[c_i].xy;
-      v2.x *= wh_ratio;
-      float dis = length(v2);
-      if (dis <= lights[c_i].z) {
-        col.a = 0.0;
-        break;
-      } else if (lights[c_i].w > 0.0 && dis <= (lights[c_i].z + lights[c_i].w)) {
-        float t = smoothstep(0.0, 1.0, (dis - lights[c_i].z) / lights[c_i].w);
-        col.a -= (1.0-t); 
-      }
+    vec2 v2 = v_uv - lights[c_i].xy;
+    v2.x *= wh_ratio;
+    float dis = length(v2);
+    if (dis <= (lights[c_i].z + lights[c_i].w)) {
+      bool isCross = false;
+      #if CALC_OCCLUDER //计算遮挡物
+        if (lightShadow[c_i].x > 0.5) {
+          isCross = isLightOccluder(lights[c_i].xy);
+        }
+      #endif
 
-      if (col.a <= 0.0) {
-        col.a = 0.0;
-        break;
+      if (!isCross) {
+        if (dis <= lights[c_i].z) {
+          col.a = 0.0;
+          break;
+        } else if (lights[c_i].w > 0.0 && dis <= (lights[c_i].z + lights[c_i].w)) {
+          float t = smoothstep(0.0, 1.0, (dis - lights[c_i].z) / lights[c_i].w);
+          col.a -= (1.0-t); 
+        }
+
+        if (col.a <= 0.0) {
+          col.a = 0.0;
+          break;
+        }
       }
     }
   }
@@ -193,42 +195,44 @@ vec4 frag() {
     vS1 = lightSectors[c_i];
     vS2 = lightSectors[c_i+1];
 
-    bool isCross = false;
-    #if CALC_OCCLUDER //计算遮挡物
-      if (vS1.w > 0.5) {
-        isCross = isLightOccluder(vS1.xy);
-      }
-    #endif
+    vec2 v2 = v_uv - vS1.xy;
+    v2.x *= wh_ratio;
+    float dis = length(v2);
+    float radDis2 = sectorRadDis(v2, vS1.z, vS2.z + vS2.w);
 
-    if (!isCross) {
-      vec2 v2 = v_uv - vS1.xy;
-      v2.x *= wh_ratio;
-      float dis = length(v2);
-      float radDis = sectorRadDis(v2, vS1.z, vS2.z);
-
-      if (radDis <= 0.0) {
-        if (dis <= vS2.x) {
-          col.a = 0.0;
-        } else if (dis <= (vS2.x + vS2.y)) {
-          col.a -= smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
+    if (dis <= (vS2.x + vS2.y) && radDis2 <= 0.0) {
+      bool isCross = false;
+      #if CALC_OCCLUDER //计算遮挡物
+        if (vS1.w > 0.5) {
+          isCross = isLightOccluder(vS1.xy);
         }
-      } else {
-        float radDis2 = sectorRadDis(v2, vS1.z, vS2.z + vS2.w);
-        if (radDis2 <= 0.0) {
-          float a1 = smoothstep(0.0, 1.0, -radDis2 / (radDis -radDis2));
+      #endif
 
+      if (!isCross) {
+        float radDis = sectorRadDis(v2, vS1.z, vS2.z);
+        if (radDis <= 0.0) {
           if (dis <= vS2.x) {
-            col.a -= a1;
+            col.a = 0.0;
           } else if (dis <= (vS2.x + vS2.y)) {
-            float a2 = smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
-            col.a -= min(a1, a2);
+            col.a -= smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
+          }
+        } else {
+          if (radDis2 <= 0.0) {
+            float a1 = smoothstep(0.0, 1.0, -radDis2 / (radDis -radDis2));
+
+            if (dis <= vS2.x) {
+              col.a -= a1;
+            } else if (dis <= (vS2.x + vS2.y)) {
+              float a2 = smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
+              col.a -= min(a1, a2);
+            }
           }
         }
-      }
 
-      if (col.a <= 0.0) {
-        col.a = 0.0;
-        return col;
+        if (col.a <= 0.0) {
+          col.a = 0.0;
+          return col;
+        }
       }
     }
   }

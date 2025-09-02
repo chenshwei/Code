@@ -74,9 +74,10 @@ export class SceneLightMgr  {
      * @param pos 圆心位置
      * @param direction 朝向
      * @param radius 半径
-     * @param outerWidth  外拓宽度
+     * @param outerWidth 外拓宽度
      * @param angle 张开角度
-     * @param angleEx 外拓角度 // 先不管这个
+     * @param angleEx 外拓角度
+     * @param isShadow 是否产生阴影
      */
     static addLightSector(uuid: string, pos: Vec3, direction: number, radius: number, outerWidth: number, 
         angle: number, angleEx: number, isShadow: boolean = false) {
