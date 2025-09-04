@@ -123,19 +123,21 @@ export class SceneLightMgr  {
     //#region 遮挡物部分
     static occluderList: {}= {};
 
-    static addOccluder(uuid: string, pos: readonly Readonly<cc.Vec2>[]) {
+    static addOccluder(uuid: string, pos: cc.Vec2[]) {
         let arr = [];
+        let sX = 1.0 * this.radio / this.width;
+        let sY = 1.0 * this.radio / this.height;
         for (let i = 0; i < pos.length; i++) {
             let pos1 = pos[i];
 
             if (i == 0) {
-                arr.push(new cc.Vec4(Math.ceil(pos.length/2), (pos.length-1)%2, pos1.x, pos1.y));
+                arr.push(new cc.Vec4(Math.ceil(pos.length/2), (pos.length-1)%2, sX*pos1.x, 1.0-sY*pos1.y));
             } else if (i + 1 < pos.length){
                 let pos2 = pos[i+1];
-                arr.push(new cc.Vec4(pos1.x, pos1.y, pos2.x, pos2.y));
+                arr.push(new cc.Vec4(sX*pos1.x, 1.0-sY*pos1.y, sX*pos2.x, 1.0-sY*pos2.y));
                 i++;
             } else {
-                arr.push(new cc.Vec4(pos1.x, pos1.y));
+                arr.push(new cc.Vec4(sX*pos1.x, 1.0-sY*pos1.y));
                 i++;
             }
         }
