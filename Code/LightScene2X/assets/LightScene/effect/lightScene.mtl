@@ -1,0 +1,19 @@
+{
+  "__type__": "cc.Material",
+  "_name": "lightScene",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "7a7423db-ce68-4156-988a-bdab14cd3ec4"
+  },
+  "_techniqueIndex": 0,
+  "_techniqueData": {
+    "0": {
+      "props": {},
+      "defines": {
+        "USE_TEXTURE": true,
+        "CALC_OCCLUDER": true
+      }
+    }
+  }
+}

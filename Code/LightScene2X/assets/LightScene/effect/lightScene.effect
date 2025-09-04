@@ -1,0 +1,256 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+
+CCEffect %{
+  techniques:
+  - passes:
+    - vert: vs
+      frag: fs
+      blendState:
+        targets:
+        - blend: true
+      rasterizerState:
+        cullMode: none
+      properties:
+        texture: { value: white }
+        alphaThreshold: { value: 0.5 }
+        whRatio: { value: 2.22222 }
+        lights: { value: [-1.0, 0.0, 0.0, 0.0]}
+        lightSectors: { value: [-1.0, 0.0, 0.0, 0.0]}
+        occluders: { value: [0.0, 0.0, 0.0, 0.0]}
+        lightShadow: { value: [0.0, 0.0, 0.0, 0.0]}
+}%
+
+
+CCProgram vs %{
+  precision highp float;
+
+  #include <cc-global>
+  #include <cc-local>
+
+  in vec3 a_position;
+  in vec4 a_color;
+  out vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 a_uv0;
+  out vec2 v_uv0;
+  #endif
+
+  void main () {
+    vec4 pos = vec4(a_position, 1);
+
+    #if CC_USE_MODEL
+    pos = cc_matViewProj * cc_matWorld * pos;
+    #else
+    pos = cc_matViewProj * pos;
+    #endif
+
+    #if USE_TEXTURE
+    v_uv0 = a_uv0;
+    #endif
+
+    v_color = a_color;
+
+    gl_Position = pos;
+  }
+}%
+
+
+CCProgram fs %{
+  precision highp float;
+
+  #include <alpha-test>
+  #include <texture>
+
+  in vec4 v_color;
+
+  #if USE_TEXTURE
+  in vec2 v_uv0;
+  uniform sampler2D texture;
+  #endif
+
+  #define light_max_num 30 //点光源最大数量
+  #define lightSector_max_num 30 //扇形光源最大数量
+  #define occluder_max_num 100 //遮挡物数据列表最大长度
+  #define PI 3.14159265359
+
+
+  uniform Constant {
+    vec4 lights[light_max_num]; // 点光源 xy=圆心位置 z=半径 w=向外渐变距离
+    vec4 lightShadow[light_max_num]; // 点光源是否产生阴影
+    vec4 lightSectors[lightSector_max_num*2]; // 扇形光源
+    vec4 occluders[occluder_max_num]; // 遮挡线段 
+    float whRatio;
+  };
+
+  // 判断线段是否相交
+  bool lineSegmentIntersectOptimized(vec2 p1, vec2 p2, vec2 p3, vec2 p4) {
+    // 快速排斥试验：检查包围盒是否相交
+    if (max(p1.x, p2.x) < min(p3.x, p4.x) || 
+        max(p3.x, p4.x) < min(p1.x, p2.x) ||
+        max(p1.y, p2.y) < min(p3.y, p4.y) || 
+        max(p3.y, p4.y) < min(p1.y, p2.y)) {
+        return false;
+    }
+    
+    // 跨立试验
+    vec2 a = p2 - p1;
+    vec2 b = p4 - p3;
+    vec2 c = p3 - p1;
+    
+    float denom = a.x * b.y - a.y * b.x;
+    
+    if (abs(denom) < 1e-6) {
+        return false;
+    }
+    
+    float t = (c.x * b.y - c.y * b.x) / denom;
+    float u = (c.x * a.y - c.y * a.x) / denom;
+    
+    return (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0);
+  }
+
+  bool isLightOccluder(vec2 lightPos) {
+    bool isCross = false;
+    vec2 bPos = vec2(0.0);
+    int nextNum = 0;
+    bool isLast = false;
+    for (int o_i = 0; o_i < occluder_max_num; o_i++) {
+      if (o_i == nextNum) {
+        if (occluders[o_i].x <= 0.0) {
+          break;
+        }
+        isLast = occluders[o_i].y <= 0.0;
+        bPos = occluders[o_i].zw;
+        nextNum = o_i + int(occluders[o_i].x) + 1;
+      } else {
+        isCross = lineSegmentIntersectOptimized(v_uv0, lightPos, occluders[o_i-1].zw, occluders[o_i].xy);
+        if (isCross) {break;}
+
+        if (o_i+1 != nextNum || isLast) {
+          isCross = lineSegmentIntersectOptimized(v_uv0, lightPos, occluders[o_i].xy, occluders[o_i].zw);
+          if (isCross) {break;}
+        }
+
+        if (o_i+1 == nextNum) {
+          isCross = lineSegmentIntersectOptimized(v_uv0, lightPos, isLast ? occluders[o_i].zw : occluders[o_i].xy, bPos);
+          if (isCross) {break;}
+        }
+      } 
+    }
+    return isCross;
+  }
+
+  float sectorRadDis(vec2 d, float direction, float angle) {
+    float r_angle = radians(angle);
+    float r_direction = radians(direction);
+    
+    // 计算角度
+    float theta = atan(d.y, d.x) - 0.5*PI + r_direction;
+    
+    // 将角度限制在扇形范围内
+    float angleToAxis = abs(mod(theta , 2.0*PI) - PI);
+    
+    // 计算角度方向的距离
+    float angularDistance = angleToAxis - r_angle/2.0;
+    return angularDistance;
+  }
+
+  void main () {
+    vec4 col = vec4(1, 1, 1, 1);
+
+    col *= v_color;
+
+    for (int c_i = 0; c_i < light_max_num; c_i++) {
+      if (lights[c_i].x <= -1.0) {
+        break;
+      }
+
+      vec2 v2 = v_uv0 - lights[c_i].xy;
+      v2.x *= whRatio;
+      float dis = length(v2);
+      if (dis <= (lights[c_i].z + lights[c_i].w)) {
+        bool isCross = false;
+        #if CALC_OCCLUDER //计算遮挡物
+          if (lightShadow[c_i].x > 0.5) {
+            isCross = isLightOccluder(lights[c_i].xy);
+          }
+        #endif
+
+        if (!isCross) {
+          if (dis <= lights[c_i].z) {
+            col.a = 0.0;
+            break;
+          } else if (lights[c_i].w > 0.0 && dis <= (lights[c_i].z + lights[c_i].w)) {
+            float t = smoothstep(0.0, 1.0, (dis - lights[c_i].z) / lights[c_i].w);
+            col.a -= (1.0-t); 
+          }
+
+          if (col.a <= 0.0) {
+            col.a = 0.0;
+            break;
+          }
+        }
+      }
+    }
+
+    if (col.a > 0.0) {
+      vec4 vS1;
+      vec4 vS2;
+      for (int c_i = 0; c_i < lightSector_max_num; c_i+=2) {
+        if (lightSectors[c_i].x <= -1.0) {
+          break;
+        }
+        vS1 = lightSectors[c_i];
+        vS2 = lightSectors[c_i+1];
+
+        vec2 v2 = v_uv0 - vS1.xy;
+        v2.x *= whRatio;
+        float dis = length(v2);
+        float radDis2 = sectorRadDis(v2, vS1.z, vS2.z + vS2.w);
+
+        if (dis <= (vS2.x + vS2.y) && radDis2 <= 0.0) {
+          bool isCross = false;
+          #if CALC_OCCLUDER //计算遮挡物
+            if (vS1.w > 0.5) {
+              isCross = isLightOccluder(vS1.xy);
+            }
+          #endif
+
+          if (!isCross) {
+            float radDis = sectorRadDis(v2, vS1.z, vS2.z);
+            if (radDis <= 0.0) {
+              if (dis <= vS2.x) {
+                col.a = 0.0;
+              } else if (dis <= (vS2.x + vS2.y)) {
+                col.a -= smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
+              }
+            } else {
+              if (radDis2 <= 0.0) {
+                float a1 = smoothstep(0.0, 1.0, -radDis2 / (radDis -radDis2));
+
+                if (dis <= vS2.x) {
+                  col.a -= a1;
+                } else if (dis <= (vS2.x + vS2.y)) {
+                  float a2 = smoothstep(1.0, 0.0, (dis - vS2.x) / vS2.y);
+                  col.a -= min(a1, a2);
+                }
+              }
+            }
+
+            if (col.a <= 0.0) {
+              col.a = 0.0;
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    #if USE_BGRA
+      gl_FragColor = col.bgra;
+    #else
+      gl_FragColor = col.rgba;
+    #endif
+  }
+}%
