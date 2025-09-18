@@ -11,6 +11,7 @@ export class SceneLightMgr  {
     static width: number = 1280;
     static height: number = 720;
     static camera: Camera;
+    static rtcamera: Camera;
 
     static radio: number = 1;
 
@@ -56,10 +57,13 @@ export class SceneLightMgr  {
             let shadowArr = [];
             for (const key in this.lightPosList) {
                 const element = this.lightPosList[key];
-                newArr.push(element);
-                shadowArr.push(this.lightShadow[key]);
+                if (element) {
+                    newArr.push(element);
+                    shadowArr.push(this.lightShadow[key]);  
+                }
             }
             newArr.push(new Vec4(-1));
+            this.updateRT();
             this.material.setProperty("lights", newArr);
             this.material.setProperty("lightShadow", shadowArr);
         }
@@ -106,6 +110,7 @@ export class SceneLightMgr  {
                 }
             }
             newArr.push(new Vec4(-1));
+            this.updateRT();
             this.material.setProperty("lightSectors", newArr);
         }
     }
@@ -147,6 +152,7 @@ export class SceneLightMgr  {
     }
     static updateMatOccluder() {
         if (this.material) {
+            this.updateRT();
             let newArr = [];
             for (const key in this.occluderList) {
                 const element = this.occluderList[key];
@@ -161,5 +167,25 @@ export class SceneLightMgr  {
         }
     }
     //#endregion 遮挡物部分
+
+    private static _timer = null;
+    static updateRT() {
+        if (!this.rtcamera) return;
+        this.cleanTimer();
+
+        this.rtcamera.node.active = true;
+        this._timer = setTimeout(() => {
+            this._timer = null;
+            if (this.rtcamera && this.rtcamera.node) {
+                this.rtcamera.node.active = false;
+            }
+        }, 100);
+    }
+    static cleanTimer() {
+        if (this._timer) {
+            clearTimeout(this._timer);
+            this._timer = null;
+        }
+    }
 }
 
