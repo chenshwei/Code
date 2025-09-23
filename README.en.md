@@ -34,15 +34,23 @@
     - If an occluder is set, the material needs to have CALC_OCCLUDER checked.
     - It is recommended to use simple shapes as occluders.
 
-## RT Solution for Multiple Obstacles
-- Create a new Sprite and Camera, and set a separate Layer!
-- ![2dlightrt1.png](https://download.cocos.com/CocosStore/resource/36d66f106f6043d2b763e969490b919a/36d66f106f6043d2b763e969490b919a.png)
+## Solutions for Multiple Obstacles
+- RT (Render Texture) Solution
+    - Create a new `Sprite` and `Camera`, and set a separate layer!
+    - ![2dlightrt1.png](https://download.cocos.com/CocosStore/resource/36d66f106f6043d2b763e969490b919a/36d66f106f6043d2b763e969490b919a.png)
+- Using Medium Precision for Float
+    - In [lightScene.effect](file://e:\N1\TestGithub\Code\LightScene\assets\LightScene\effect\lightScene.effect), change `precision highp float;` to `precision mediump float;`
+    - Note: Performance is improved, but the visual quality may degrade.
+        - In the test scene with circular and star-shaped occluders, abnormal shadows appear at the edges.
+        - In the test scene with rectangular occluders, the performance is relatively normal.
 
-Mobile Testing Data  
-| Scene Name | FPS | FPS while Moving | Remarks |
-|------------|-----|------------------|---------|
-| LightSceneTest.scene | 25~ | 25~ | Default Solution |
-| LightSceneTestRT.scene | 120~ | 80~ | RT Solution |
+Mobile Test Data  
+| Scene Name | FPS | FPS While Moving | Remarks |
+|----------|---------|---------|----------------|
+| LightSceneTest.scene | 25~ | 25~ | Default solution + High precision |
+| LightSceneTest.scene | 30~ | 30~ | Default solution + Medium precision |
+| LightSceneTestRT.scene | 120~ | 80~ | RT solution + High precision |
+| LightSceneTestRT.scene | 120~ | 105~ | RT solution + Medium precision |
 
 ## Contact the Author
 - [Related Forum Post](https://forum.cocos.org/t/topic/170254/4)
