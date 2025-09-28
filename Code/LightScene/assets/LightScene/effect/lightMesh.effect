@@ -1,0 +1,82 @@
+// Copyright (c) 2017-2020 Xiamen Yaji Software Co., Ltd.
+CCEffect %{
+  techniques:
+  - name: add
+    passes:
+    - vert: unlit-vs:vert
+      frag: unlit-fs:frag
+      rasterizerState: { cullMode: none }
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one
+      properties:
+        mainColor:      { value: [1, 1, 1, 1], editor: { type: color } }
+        radius: { value: 100.0 }
+        outlen: { value: 200.0 }
+}%
+
+CCProgram unlit-vs %{
+  precision highp float;
+  #include <legacy/input>
+  #include <builtin/uniforms/cc-global>
+  #include <legacy/decode-base>
+  #include <legacy/local-batch>
+  #include <legacy/input>
+
+  out vec3 v_modelPos;
+
+  vec4 vert () {
+    vec4 position;
+    CCVertInput(position);
+
+    mat4 matWorld;
+    CCGetWorldMatrix(matWorld);
+
+    v_modelPos = position.xyz;
+
+    #if CC_USE_2D
+        return cc_matProj * cc_matView * position;
+    #else
+        return cc_matProj * (cc_matView * matWorld) * position;
+    #endif
+  }
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  #include <legacy/output-standard>
+
+  uniform Constant {
+    vec4 mainColor;
+    float radius;
+    float outlen;
+    
+  };
+  
+  in vec3 v_modelPos;
+
+  vec4 frag () {
+    vec4 o = vec4(1.0, 1.0, 1.0, 1.0);
+    
+    float dis = length(v_modelPos);
+
+    if (dis <= radius) {
+        o.a = 1.0;
+    } else if (dis <= (radius + outlen)) {
+        o.a = 1.0 - (dis - radius) / outlen;
+    } else {
+        o.a = 0.0;
+    }
+
+    return o;
+  }
+}%
+
+

@@ -12,7 +12,7 @@ export class LightSceneTest extends Component {
     @property([Toggle])
     togList: Toggle[] = []; 
 
-    protected onLoad(): void {
+    protected onEnable(): void {
         for (let i = 0; i < this.togList.length; i++) {
             const toggle = this.togList[i];
             let id = i;

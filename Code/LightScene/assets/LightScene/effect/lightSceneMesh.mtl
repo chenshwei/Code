@@ -5,14 +5,12 @@
   "__editorExtras__": {},
   "_native": "",
   "_effectAsset": {
-    "__uuid__": "bce9c817-26d6-4c9f-b024-b0f2978c057d",
+    "__uuid__": "18ca9ec3-e394-4d86-809a-27c0f86d59eb",
     "__expectedType__": "cc.EffectAsset"
   },
   "_techIdx": 0,
   "_defines": [
-    {
-      "CALC_OCCLUDER": true
-    }
+    {}
   ],
   "_states": [
     {
@@ -27,10 +25,7 @@
   ],
   "_props": [
     {
-      "lights": [],
-      "lightSectors": [],
-      "occluders": [],
-      "lightShadow": []
+      "lights": []
     }
   ]
 }

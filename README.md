@@ -37,22 +37,22 @@
     - 建议使用简易形状做遮挡物
 
 ## 多障碍物时可选用方案
-- RT方案
-    - 新建Sprite和Camera, 设置单独Layer！
-    - ![2dlightrt1.png](https://download.cocos.com/CocosStore/resource/36d66f106f6043d2b763e969490b919a/36d66f106f6043d2b763e969490b919a.png)
 - float使用中等精度
     - lightScene.effect中 `precision highp float;`修改为 `precision mediump float;` 
-    - 注意，性能有所提升，但是表现会有点不佳。
+    - 注意，性能有所提升，但是表现会有点不佳。适合遮挡物为矩形情况。
         - 测试场景中圆形和星星形遮挡物，边缘阴影出现异常
         - 测试场景中矩形遮挡物，表现较为正常
+- 光照mesh方案
+    - 新建Camera, 设置单独Layer！
+    - 将顶层图片改用LightSceneMesh材质！
+    - 具体细节可参考LightSceneTestMesh场景
 
 手机端测试数据  
 | 场景名称 | FPS | 移动时FPS | 备注           |
 |----------|---------|---------|----------------|
-| LightSceneTest.scene    | 25~      | 25~      | 默认方案 + 高精度   |
-| LightSceneTest.scene    | 30~      | 30~      | 默认方案 + 中精度  |
-| LightSceneTestRT.scene    | 120~       | 80~      | RT方案 + 高精度 |
-| LightSceneTestRT.scene    | 120~       | 105~      | RT方案 + 中精度 |
+| LightSceneTest.scene    | 35~      | 35~      | 默认方案 + 高精度   |
+| LightSceneTestMesh.scene    | 120~       | 120~      | 光照mesh方案 |
+
 
 ## 联系作者
 - [论坛相关帖子](https://forum.cocos.org/t/topic/170254/4)

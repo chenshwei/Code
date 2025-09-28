@@ -1,0 +1,73 @@
+// chenshw23
+// cocos store : https://store.cocos.com/dashboard/detail/8073
+
+CCEffect %{
+techniques:
+  - passes:
+      - vert: lightSceneMesh-vs:vert
+        frag: lightSceneMesh-fs:frag
+        depthStencilState:
+          depthTest: false
+          depthWrite: false
+        blendState:
+          targets:
+            - blend: true
+              blendSrc: src_alpha
+              blendDst: one_minus_src_alpha
+              # blendSrcAlpha: src_alpha
+              blendDstAlpha: one_minus_src_alpha
+        rasterizerState:
+          cullMode: none
+        properties:
+          wh_ratio: { value: 2.22222 }
+          lightTexture: { value: black }
+}%
+
+CCProgram lightSceneMesh-vs %{
+precision highp float;
+#include <builtin/uniforms/cc-global>
+
+in vec3 a_position;
+in vec2 a_texCoord;
+in vec4 a_color;
+
+out vec4 v_color;
+out vec2 v_uv;
+
+vec4 vert() {
+  vec4 pos = vec4(a_position, 1);
+  pos = cc_matViewProj * pos;
+  v_uv = a_texCoord;
+  v_color = a_color;
+  return pos;
+}
+}%
+
+CCProgram lightSceneMesh-fs %{
+precision highp float;
+#include <legacy/output>
+#include <builtin/internal/embedded-alpha>
+#include <builtin/internal/alpha-test>
+
+in vec2 v_uv;
+in vec4 v_color;
+
+uniform sampler2D lightTexture;
+
+uniform Constant {
+  float wh_ratio;
+};
+
+vec4 frag() {
+  vec4 col = v_color;
+  vec2 uvNew = vec2(v_uv.x, 1.0 - v_uv.y); //因为RenderTexture
+  vec4 lightT = CCSampleWithAlphaSeparated(lightTexture, uvNew);
+  if (lightT.r <= 0.0) {
+    return col;
+  }
+
+  col.a = col.a * (1.0 - lightT.r);
+
+  return col;
+}
+}%

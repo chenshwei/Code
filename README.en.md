@@ -35,22 +35,21 @@
     - It is recommended to use simple shapes as occluders.
 
 ## Solutions for Multiple Obstacles
-- RT (Render Texture) Solution
-    - Create a new `Sprite` and `Camera`, and set a separate layer!
-    - ![2dlightrt1.png](https://download.cocos.com/CocosStore/resource/36d66f106f6043d2b763e969490b919a/36d66f106f6043d2b763e969490b919a.png)
-- Using Medium Precision for Float
+- Use medium precision for float
     - In [lightScene.effect](file://e:\N1\TestGithub\Code\LightScene\assets\LightScene\effect\lightScene.effect), change `precision highp float;` to `precision mediump float;`
-    - Note: Performance is improved, but the visual quality may degrade.
-        - In the test scene with circular and star-shaped occluders, abnormal shadows appear at the edges.
-        - In the test scene with rectangular occluders, the performance is relatively normal.
+    - Note: Performance will improve, but visual quality may degrade slightly. Suitable for rectangular obstacles.
+        - In test scenes, circular and star-shaped obstacles show abnormal edge shadows
+        - Rectangular obstacles perform relatively well
+- Light Mesh Solution
+    - Create a new Camera and set a separate Layer!
+    - Use the `LightSceneMesh` material for the top-level image!
+    - For specific details, refer to the `LightSceneTestMesh` scene
 
 Mobile Test Data  
-| Scene Name | FPS | FPS While Moving | Remarks |
-|----------|---------|---------|----------------|
-| LightSceneTest.scene | 25~ | 25~ | Default solution + High precision |
-| LightSceneTest.scene | 30~ | 30~ | Default solution + Medium precision |
-| LightSceneTestRT.scene | 120~ | 80~ | RT solution + High precision |
-| LightSceneTestRT.scene | 120~ | 105~ | RT solution + Medium precision |
+| Scene Name | FPS | FPS while Moving | Remarks |
+|------------|-----|------------------|---------|
+| LightSceneTest.scene | 35~ | 35~ | Default solution + High Precision |
+| LightSceneTestMesh.scene | 120~ | 115~ | Light Mesh Solution |
 
 ## Contact the Author
 - [Related Forum Post](https://forum.cocos.org/t/topic/170254/4)

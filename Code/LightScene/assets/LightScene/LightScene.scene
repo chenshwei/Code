@@ -188,7 +188,7 @@
     "_priority": 2,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 503.4887737478411,
+    "_orthoHeight": 597.377049180328,
     "_near": 0,
     "_far": 2000,
     "_color": {
@@ -3627,8 +3627,8 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "radius": 120,
-    "outLen": 500,
+    "radius": 300,
+    "outLen": 100,
     "isShadow": true,
     "_id": "a8WNPWk0pPA5Lk02oH1ASa"
   },

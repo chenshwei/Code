@@ -54,7 +54,7 @@
     "_globals": {
       "__id__": 387
     },
-    "_id": "0b42d696-87b8-4288-a964-500bb96f9c16"
+    "_id": "54137e28-4609-4e2a-88b0-d1c83cae4f3d"
   },
   {
     "__type__": "cc.Node",
@@ -197,7 +197,7 @@
     "_priority": 2,
     "_fov": 45,
     "_fovAxis": 0,
-    "_orthoHeight": 585.8610271903324,
+    "_orthoHeight": 732.462311557789,
     "_near": 0,
     "_far": 2000,
     "_color": {
@@ -360,8 +360,7 @@
     "camera": {
       "__id__": 4
     },
-    "scale": 1,
-    "_id": "9e16LvEdZJ5qu9Ai6c0GUx"
+    "_id": "80x7ZpkK5BtZhRSBj6VX7d"
   },
   {
     "__type__": "cc.Sprite",
@@ -741,7 +740,7 @@
         "__id__": 21
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 24
@@ -864,8 +863,8 @@
     "_enabled": true,
     "__prefab": null,
     "_direction": 45,
-    "_radius": 300,
-    "_outerWidth": 300,
+    "_radius": 150,
+    "_outerWidth": 150,
     "_angle": 90,
     "_angleEx": 10,
     "_isShadow": true,
@@ -1095,7 +1094,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "7ePd5ErShD+p9q3TeCAWNn"
   },
@@ -1180,7 +1179,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "c1bPFiCBJFHZrEeeIpHzH3"
   },
@@ -1265,7 +1264,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "25mhB8YdZLRI/gugdRQZYX"
   },
@@ -1350,7 +1349,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "abCZ+CbT5GUJ7NA5+7ukyn"
   },
@@ -1435,7 +1434,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "01Cz6p9OVIu740EVzrMEsW"
   },
@@ -1520,7 +1519,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "8a/fLWUiFHuJIt7SBMQfXz"
   },
@@ -1605,7 +1604,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "b8gYBSr0hMbZCl7H1nWwqx"
   },
@@ -1690,7 +1689,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 20,
-    "outLen": 100,
+    "outLen": 20,
     "isShadow": false,
     "_id": "b5V616KCBMiISxYOyqX8zw"
   },
@@ -1962,7 +1961,7 @@
       "__id__": 56
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 58
@@ -2309,7 +2308,7 @@
       "__id__": 56
     },
     "checkEvents": [],
-    "_isChecked": true,
+    "_isChecked": false,
     "_checkMark": {
       "__id__": 59
     },
@@ -13496,7 +13495,7 @@
     "_enabled": true,
     "__prefab": null,
     "radius": 120,
-    "outLen": 1000,
+    "outLen": 100,
     "isShadow": true,
     "_id": "a8WNPWk0pPA5Lk02oH1ASa"
   },
@@ -13633,7 +13632,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 204,
+      "width": 297.3203125,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -13663,7 +13662,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "测试多遮挡物时候性能",
+    "_string": "测试多遮挡物时候性能(默认方案)",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
