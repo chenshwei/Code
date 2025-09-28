@@ -44,6 +44,8 @@
     - Create a new Camera and set a separate Layer!
     - Use the `LightSceneMesh` material for the top-level image!
     - For specific details, refer to the `LightSceneTestMesh` scene
+    - No limit on the number of light sources, no limit on the number of occluders.
+    - ⚠️**Temporarily does not support sector light sources** (In this scheme, point light sources can be achieved with simple restrictions, but due to compatibility and configuration issues, support has not been implemented yet).
 
 Mobile Test Data  
 | Scene Name | FPS | FPS while Moving | Remarks |
