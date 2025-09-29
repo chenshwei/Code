@@ -48,7 +48,7 @@
     - 具体细节可参考LightSceneTestMesh场景
     - 没有光源数量限制、没有遮挡物数量限制。
     - ⚠️**暂时不支持扇形光源** (该方案下点光源部分简单限制即可实现，因为兼容性和设置问题，暂未处理支持)
-    - 
+    - ![lightMesh1.png](https://download.cocos.com/CocosStore/resource/40f130dd6737401d999dd83c1aa67cb3/40f130dd6737401d999dd83c1aa67cb3.png)
 
 手机端测试数据  
 | 场景名称 | FPS | 移动时FPS | 备注           |
