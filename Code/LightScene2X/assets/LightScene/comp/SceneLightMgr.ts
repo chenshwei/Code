@@ -3,27 +3,24 @@
  * 2D简易光照-管理器
  */
 export class SceneLightMgr  {
-
-    static lightPosList: {}= {};
-
     static material: cc.Material;
+
     static width: number = 1280;
     static height: number = 720;
-
-    static radio: number = 1;
+    static scaleX: number = 1;
 
     //#region 初始化部分
-    static initMat(material: cc.Material, width: number, height: number) {
-        this.width = width;
-        this.height = height;
+    static initMat(material: cc.Material) {
+        this.width = cc.winSize.width;
+        this.height = cc.winSize.height;
+
         if (material) {
             this.material = material;
-            this.material.setProperty("whRatio", width/height);
+            this.material.setProperty("whRatio", this.width/this.height);
         } else {
             this.material = null;
         }
 
-        // this.radio = this.width / screen.width;
         this.lightPosList = {};
         this.lightSectorList = {};
     }
@@ -43,13 +40,21 @@ export class SceneLightMgr  {
         }
         return new Float32Array(floatArr);
     }
+
+    private static _tmpVec3 = new cc.Vec3();
+    private static worldToUV(pos: cc.Vec2) { 
+        
+        return new cc.Vec2(pos.x/this.width, 1-pos.y/this.height);
+    }
+
     //#endregion 辅助部分
 
 
     //#region 光源部分-点光源
+    static lightPosList: {} = {};
     static lightShadow: {} = {}
     static addLightPos(uuid: string, screenPos: cc.Vec2, radius: number, outLen: number, isShadow: boolean = false) {
-        this.lightPosList[uuid] = new cc.Vec4(this.radio*screenPos.x/this.width, 1-this.radio*screenPos.y/this.height, radius/this.width, outLen/this.width);
+        this.lightPosList[uuid] = new cc.Vec4(screenPos.x/this.width, 1-screenPos.y/this.height, this.scaleX*radius/this.height, this.scaleX*outLen/this.height);
         this.lightShadow[uuid] = new cc.Vec4(isShadow ? 1 : 0, 0, 0, 0);
         this.updateMaterial();
     }
@@ -93,8 +98,8 @@ export class SceneLightMgr  {
         angle: number, angleEx: number, isShadow: boolean = false) {
         
         this.lightSectorList[uuid] = [
-            new cc.Vec4(this.radio*screenPos.x/this.width, 1-this.radio*screenPos.y/this.height, direction, isShadow ? 1 : 0),
-            new cc.Vec4(radius/this.width, outerWidth/this.height, angle, angleEx),
+            new cc.Vec4(screenPos.x/this.width, 1-screenPos.y/this.height, direction, isShadow ? 1 : 0),
+            new cc.Vec4(this.scaleX*radius/this.height, this.scaleX*outerWidth/this.height, angle, angleEx),
         ];
         this.updateMatSector();
     }
@@ -125,19 +130,17 @@ export class SceneLightMgr  {
 
     static addOccluder(uuid: string, pos: cc.Vec2[]) {
         let arr = [];
-        let sX = 1.0 * this.radio / this.width;
-        let sY = 1.0 * this.radio / this.height;
         for (let i = 0; i < pos.length; i++) {
-            let pos1 = pos[i];
+            let pos1 = this.worldToUV(pos[i]);
 
             if (i == 0) {
-                arr.push(new cc.Vec4(Math.ceil(pos.length/2), (pos.length-1)%2, sX*pos1.x, 1.0-sY*pos1.y));
+                arr.push(new cc.Vec4(Math.ceil(pos.length/2), (pos.length-1)%2, pos1.x, pos1.y));
             } else if (i + 1 < pos.length){
-                let pos2 = pos[i+1];
-                arr.push(new cc.Vec4(sX*pos1.x, 1.0-sY*pos1.y, sX*pos2.x, 1.0-sY*pos2.y));
+                let pos2 = this.worldToUV(pos[i+1]);
+                arr.push(new cc.Vec4(pos1.x, pos1.y, pos2.x, pos2.y));
                 i++;
             } else {
-                arr.push(new cc.Vec4(sX*pos1.x, 1.0-sY*pos1.y));
+                arr.push(new cc.Vec4(pos1.x, pos1.y));
                 i++;
             }
         }

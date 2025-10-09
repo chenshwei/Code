@@ -11,7 +11,7 @@ export class LightScene extends cc.Component {
 
     protected onLoad(): void {
         let mat = this.topSprite?.getMaterial(0);
-        SceneLightMgr.initMat(mat, cc.winSize.width, cc.winSize.height);
+        SceneLightMgr.initMat(mat);
         this.topSprite.node.setContentSize(cc.winSize.width, cc.winSize.height);
     }
 }
