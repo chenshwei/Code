@@ -2,6 +2,7 @@
 - Custom Material
 - Support for Multiple Light Sources
 - Support for Occluders (Blocking Light Sources)
+- Support camera movement (only for Creator 3.X)
 
 ## Usage Tutorial
 - Preparation 1: Create a top-level image and use a custom material.
@@ -40,7 +41,7 @@
     - Note: Performance will improve, but visual quality may degrade slightly. Suitable for rectangular obstacles.
         - In test scenes, circular and star-shaped obstacles show abnormal edge shadows
         - Rectangular obstacles perform relatively well
-- Light Mesh Solution
+- Light Mesh Solution (only for Creator 3.X)
     - Create a new Camera and set a separate Layer!
     - Use the `LightSceneMesh` material for the top-level image!
     - For specific details, refer to the `LightSceneTestMesh` scene
