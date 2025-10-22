@@ -1,4 +1,4 @@
-import { _decorator, Camera, Component, Sprite, UITransform, screen, Size, view, RenderTexture, SpriteFrame, Node, Material } from 'cc';
+import { _decorator, Camera, Component, Sprite, UITransform, screen, Size, view, RenderTexture, SpriteFrame, Node, Material, NodeEventType } from 'cc';
 import { SceneLightMgr } from './comp/SceneLightMgr';
 const { ccclass, property } = _decorator;
 
@@ -25,7 +25,7 @@ export class LightScene extends Component {
 
     @property(Sprite)
     meshTestGM: Sprite;
-    //#region  mesh方案参数
+    //#endregion  mesh方案参数
 
     protected onLoad(): void {
         SceneLightMgr.meshMaterial = this.meshMat;
@@ -58,10 +58,30 @@ export class LightScene extends Component {
             //     this.meshTestGM.getComponent(UITransform).setContentSize(winSize.width, winSize.height);
             // } 
         } 
+
+        this.camera.node.on(NodeEventType.TRANSFORM_CHANGED, this.onCameraUpdatePos, this);
     }
 
     public onDestroy() {
         
+    }
+
+    private onCameraUpdatePos() {
+        this.topSprite.node.x = this.camera.node.x;
+        this.topSprite.node.y = this.camera.node.y;
+
+        if (this.meshCamera) {
+            this.meshCamera.node.x = this.camera.node.x;
+            this.meshCamera.node.y = this.camera.node.y;
+        } else {
+            let list = SceneLightMgr.compList;
+            for (let index = 0; index < list.length; index++) {
+                const comp = list[index];
+                if (comp && comp.onUpdatePos) {
+                    comp.onUpdatePos();
+                }
+            }
+        }
     }
 }
 

@@ -31,11 +31,13 @@ export class SceneLightOccluder extends Component {
             this.onUpdatePos();
         }, 100);
         // this.onUpdatePos();
+        SceneLightMgr.addComp(this);
 
         this.node.on(NodeEventType.TRANSFORM_CHANGED, this.onUpdatePos, this);
         this.node.parent.on(NodeEventType.TRANSFORM_CHANGED, this.onUpdatePos, this);
     }
     public onDisable(): void {
+        SceneLightMgr.cleanComp(this);
         SceneLightMgr.removeOccluder(this.node.uuid);
 
         this.node.off(NodeEventType.TRANSFORM_CHANGED, this.onUpdatePos, this);

@@ -1,4 +1,4 @@
-import { _decorator, Camera, screen, Material, Node, Vec3, Vec4, Vec2, renderer, utils, primitives, MeshRenderer, Mesh, Layers, view, sys, math, Scene } from "cc";
+import { _decorator, Camera, screen, Material, Node, Vec3, Vec4, Vec2, renderer, utils, primitives, MeshRenderer, Mesh, Layers, view, math } from "cc";
 
 /**
  * 2D简易光照-管理器
@@ -41,6 +41,21 @@ export class SceneLightMgr  {
         this.lightSectorList = {};
     }
     //#endregion 初始化部分
+
+    //#region 组件记录
+    static compList = [];
+    static addComp(comp: any) {
+        this.compList.push(comp);
+    }
+
+    static cleanComp(comp: any) {
+        for (let i = this.compList.length; i >= 0; i--) {
+            if (this.compList[i] == comp) {
+                this.compList.splice(i, 1);
+            }
+        }
+    }
+    //#endregion 组件记录
 
 
     //#region 光源部分-点光源
@@ -214,7 +229,7 @@ export class SceneLightMgr  {
     private static worldToUV(pos: Vec2) { 
         this._tmpVec3.set(pos.x, pos.y, 0);
         let screenPos = this.camera.worldToScreen(this._tmpVec3);
-        return new Vec2(screenPos.x/this.width, 1-screenPos.y/this.height);
+        return this.getVec2(screenPos.x/this.width, 1-screenPos.y/this.height);
     }
 
     static addOccluder(uuid: string, posList: readonly Readonly<Vec2>[]) {
@@ -256,10 +271,12 @@ export class SceneLightMgr  {
                 let pos2 = this.worldToUV(posList[i+1]);
                 arr.push(this.getVec4(pos1.x, pos1.y, pos2.x, pos2.y));
                 i++;
+                this.cacheVec2(pos2);
             } else {
                 arr.push(this.getVec4(pos1.x, pos1.y));
                 i++;
             }
+            this.cacheVec2(pos1);
         }
         this.occluderList[uuid] = arr;
 
@@ -432,21 +449,26 @@ export class SceneLightMgr  {
     }
 
     private static getRayMinPos(origin: Vec2, direction: Vec2, maxDis: number, segList: {start: Vec2, end: Vec2}[]) {
-        let minPos: Vec2 = null;
+        let minPos: Vec2 = this.getVec2(0, 0);
         let minDis: number = Infinity;
+        let tempV2: Vec2 = this.getVec2(0, 0);
+        let isFind: boolean = false;
         for (let i = 0; i < segList.length; i++) {
             const seg = segList[i];
             const inter = this.getRayLineInter(origin, direction, seg.start, seg.end, maxDis);
             if (inter) {
-                const sss = this.getVec2(inter.x - origin.x, inter.y - origin.y);
-                const dis = sss.length();
+                tempV2.set(inter.x - origin.x, inter.y - origin.y);
+                const dis = tempV2.length();
                 if (dis < minDis) {
+                    isFind = true;
                     minDis = dis;
-                    minPos = inter;
+                    minPos.set(inter.x, inter.y);
                 }
+                this.cacheVec2(inter);
             }
         }
-        return minPos;
+        this.cacheVec2(tempV2);
+        return isFind ? minPos : null;
     }
     private static getRayLineInter(origin: Vec2, direction: Vec2, p1: Vec2, p2: Vec2, maxDis: number): Vec2 | null {
         const a11 = direction.x;
@@ -461,7 +483,7 @@ export class SceneLightMgr  {
         const t = (a22 * b1 - a12 * b2) / determinant;
         const s = (a11 * b2 - a21 * b1) / determinant;
         if (t >= 0 && t <= maxDis && s >= 0 && s <= 1) {
-            return new Vec2(
+            return this.getVec2(
                 origin.x + t * direction.x,
                 origin.y + t * direction.y
             );
@@ -492,14 +514,10 @@ export class SceneLightMgr  {
 
         const vertices: Float32Array = new Float32Array(1);
         const indices: Uint16Array = new Uint16Array(1);
-        const colors: Float32Array = new Float32Array(1);
-        const normals: Float32Array = new Float32Array(1);
 
         let geometry: primitives.IDynamicGeometry = {
             positions: vertices,
             indices16: indices,
-            colors: colors,
-            normals: normals
         };
         let ptions: primitives.ICreateDynamicMeshOptions = {
             maxSubMeshes: 1,
@@ -526,8 +544,6 @@ export class SceneLightMgr  {
         const posLen2 = posLen - 1;
         let vertices: Float32Array = new Float32Array(posLen*3);
         let indices: Uint16Array = new Uint16Array((posLen - 1) * 3);
-        let colors: Float32Array = new Float32Array(posLen*4);
-        let normals: Float32Array = new Float32Array(posLen * 3);
         for (let i = 0; i < posLen; i++) {
             const id = i * 3;
             vertices[id] = posList[i].x;
@@ -538,33 +554,10 @@ export class SceneLightMgr  {
                 indices[id + 1] = (i + 1) % posLen2;
                 indices[id + 2] = posLen2;
             }
-            normals[id] = 0;
-            normals[id + 1] = 0;
-            normals[id + 2] = 1;
-
-
-            const cId = i*4;
-            colors[cId] = 0.0;
-            colors[cId+1] = 0.0;
-            colors[cId+2] = 0.0;
-            colors[cId+3] = 1.0;
-            if (lightId == "54b/ywiGlJIaOoBMHtSHTa") {
-                colors[cId] = 0.1;
-                colors[cId+1] = 0.2;
-                colors[cId+2] = 0.3;
-            } else {
-                colors[cId] = 0.4;
-                colors[cId+1] = 0.5;
-                colors[cId+2] = 0.6;
-            }
-            // if (i == posLen2) {
-            //     colors[cId+3] = 1.0;
-            // }
         }
         lightMesh.geometry.positions = vertices;
         lightMesh.geometry.indices16 = indices;
-        lightMesh.geometry.colors = colors;
-        lightMesh.geometry.normals = normals;
+        
         // 刷新
         lightMesh.mesh.updateSubMesh(0, lightMesh.geometry);
         lightMesh.renderer.onGeometryChanged();
@@ -629,7 +622,8 @@ export class SceneLightMgr  {
                 const data = SceneLightMgr._rDirectList[id1];
                 let pos = SceneLightMgr.getRayMinPos(origin, data.dir, maxDis, segList);
                 if (pos) {
-                    posList.push(SceneLightMgr.getVec2(pos.x - origin.x, pos.y - origin.y))
+                    posList.push(SceneLightMgr.getVec2(pos.x - origin.x, pos.y - origin.y));
+                    SceneLightMgr.cacheVec2(pos);
                 } else {
                     posList.push(SceneLightMgr.getVec2(data.dir.x * maxDis, data.dir.y * maxDis))
                 }
@@ -641,6 +635,7 @@ export class SceneLightMgr  {
                 let pos = SceneLightMgr.getRayMinPos(origin, dir, maxDis, segList);
                 if (pos) {
                     posList.push(SceneLightMgr.getVec2(pos.x - origin.x, pos.y - origin.y))
+                    SceneLightMgr.cacheVec2(pos);
                 } else {
                     posList.push(SceneLightMgr.getVec2(dir.x * maxDis, dir.y * maxDis))
                 }
@@ -674,6 +669,7 @@ export class SceneLightMgr  {
         
         this.updateMesh(lightId, posList);
         
+        this.cacheVec2s(posList);
         this.cacheVec2(rayDir);
     }
 

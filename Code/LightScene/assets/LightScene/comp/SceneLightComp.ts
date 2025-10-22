@@ -29,6 +29,7 @@ export class SceneLightComp extends Component {
             this.onUpdatePos();
         }, 100);
         // this.onUpdatePos();
+        SceneLightMgr.addComp(this);
 
         // 节点位置变化监听(可根据自己项目实际调整)
         // 出于性能和操作简便考虑，目前仅监听自己和父节点
@@ -36,6 +37,7 @@ export class SceneLightComp extends Component {
         this.node.parent.on(NodeEventType.TRANSFORM_CHANGED, this.onUpdatePos, this);
     }
     public onDisable(): void {
+        SceneLightMgr.cleanComp(this);
         SceneLightMgr.removeLight(this.node.uuid);
 
         this.node.off(NodeEventType.TRANSFORM_CHANGED, this.onUpdatePos, this);
