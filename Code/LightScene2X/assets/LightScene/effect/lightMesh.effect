@@ -1,0 +1,71 @@
+// mesh方案-光照mesh使用的
+// chenshw23@foxmail.com
+
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+CCEffect %{
+  techniques:
+  - name: add
+    passes:
+    - vert: unlit-vs
+      frag: unlit-fs
+      depthStencilState:
+        depthTest: true
+        depthWrite: false
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one
+      rasterizerState:
+        cullMode: none
+      properties:
+        diffuseColor: { value: [1, 1, 1, 1], editor: { type: color } }
+        radius: { value: 100.0 }
+        outlen: { value: 200.0 }
+}%
+
+CCProgram unlit-vs %{
+  precision highp float;
+
+  attribute vec3 a_position;
+  out vec3 v_modelPos;
+
+  #include <cc-global>
+  #include <cc-local>
+
+  void main () {
+    v_modelPos = a_position;
+    gl_Position = cc_matViewProj * cc_matWorld * vec4(a_position, 1);
+  }
+}%
+
+CCProgram unlit-fs %{
+  precision highp float;
+  
+  #include <output>
+  
+  uniform DIFFUSE_COLOR {
+    vec4 diffuseColor;
+    float radius;
+    float outlen;
+  };
+  in vec3 v_modelPos;
+  void main() {
+    vec4 o = vec4(1, 1, 1, 1);
+    o *= diffuseColor;
+
+    float dis = length(v_modelPos);
+    if (dis <= radius) {
+        o.a = 1.0;
+    } else if (dis <= (radius + outlen)) {
+        o.a = 1.0 - (dis - radius) / outlen;
+    } else {
+        o.a = 0.0;
+    }
+
+    gl_FragColor = o;
+  }
+}%
+

@@ -1,4 +1,5 @@
-// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+// 默认方案-顶层图片使用的
+// chenshw23@foxmail.com
 
 CCEffect %{
   techniques:
@@ -71,7 +72,7 @@ CCProgram fs %{
 
   #define light_max_num 30 //点光源最大数量
   #define lightSector_max_num 30 //扇形光源最大数量
-  #define occluder_max_num 100 //遮挡物数据列表最大长度
+  #define occluder_max_num 200 //遮挡物数据列表最大长度
   #define PI 3.14159265359
 
 

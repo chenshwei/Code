@@ -1,0 +1,26 @@
+{
+  "__type__": "cc.Material",
+  "_name": "lightMesh",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "1934e286-1946-4b37-bbf9-4ac6cc904dd7"
+  },
+  "_techniqueIndex": 0,
+  "_techniqueData": {
+    "0": {
+      "defines": {},
+      "props": {
+        "diffuseColor": {
+          "__type__": "cc.Color",
+          "r": 255,
+          "g": 255,
+          "b": 255,
+          "a": 255
+        },
+        "radius": 5,
+        "outlen": 80
+      }
+    }
+  }
+}
