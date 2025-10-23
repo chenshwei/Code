@@ -41,12 +41,13 @@
     - Note: Performance will improve, but visual quality may degrade slightly. Suitable for rectangular obstacles.
         - In test scenes, circular and star-shaped obstacles show abnormal edge shadows
         - Rectangular obstacles perform relatively well
-- Light Mesh Solution (only for Creator 3.X)
+- Light Mesh Solution
     - Create a new Camera and set a separate Layer!
     - Use the `LightSceneMesh` material for the top-level image!
     - For specific details, refer to the `LightSceneTestMesh` scene
     - No limit on the number of light sources, no limit on the number of occluders.
     - ⚠️**Temporarily does not support sector light sources** (In this scheme, point light sources can be achieved with simple restrictions, but due to compatibility and configuration issues, support has not been implemented yet).
+    - ⚠️Feature Cropping needs keep 3D/Basic 3D Features (MeshRenderer used).
     - ![lightMesh1.png](https://download.cocos.com/CocosStore/resource/40f130dd6737401d999dd83c1aa67cb3/40f130dd6737401d999dd83c1aa67cb3.png)
 
 Mobile Test Data  
