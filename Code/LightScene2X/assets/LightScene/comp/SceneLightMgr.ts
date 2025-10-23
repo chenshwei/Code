@@ -44,10 +44,8 @@ export class SceneLightMgr  {
         return new Float32Array(floatArr);
     }
 
-    private static _tmpVec3 = new cc.Vec3();
     private static worldToUV(pos: cc.Vec2) { 
-        
-        return new cc.Vec2(pos.x/this.width, 1-pos.y/this.height);
+        return this.getVec2(pos.x/this.width, 1-pos.y/this.height);
     }
 
     //#endregion 辅助部分
@@ -141,10 +139,14 @@ export class SceneLightMgr  {
                 newArr.push(element);
                 shadowArr.push(this.lightShadow[key]);
             }
-            newArr.push(new cc.Vec4(-1));
-            shadowArr.push(new cc.Vec4(-1));
+            const endV1 = this.getVec4(-1);
+            const endV2 = this.getVec4(-1);
+            newArr.push(endV1);
+            shadowArr.push(endV2);
             this.material.setProperty("lights", this.vecArr2FloatArr(newArr));
             this.material.setProperty("lightShadow", this.vecArr2FloatArr(shadowArr));
+            this.cacheVec4(endV1);
+            this.cacheVec4(endV2);
         }
     }
     //#endregion 光源部分-点光源
@@ -166,8 +168,8 @@ export class SceneLightMgr  {
         angle: number, angleEx: number, isShadow: boolean = false) {
         
         this.lightSectorList[uuid] = [
-            new cc.Vec4(screenPos.x/this.width, 1-screenPos.y/this.height, direction, isShadow ? 1 : 0),
-            new cc.Vec4(this.scaleX*radius/this.height, this.scaleX*outerWidth/this.height, angle, angleEx),
+            this.getVec4(screenPos.x/this.width, 1-screenPos.y/this.height, direction, isShadow ? 1 : 0),
+            this.getVec4(this.scaleX*radius/this.height, this.scaleX*outerWidth/this.height, angle, angleEx),
         ];
         this.updateMatSector();
     }
@@ -188,8 +190,10 @@ export class SceneLightMgr  {
                     newArr.push(element[1]);
                 }
             }
-            newArr.push(new cc.Vec4(-1));
+            const endV = this.getVec4(-1);
+            newArr.push(endV);
             this.material.setProperty("lightSectors", this.vecArr2FloatArr(newArr));
+            this.cacheVec4(endV);
         }
     }
     //#endregion 光源部分-扇形光源
@@ -238,11 +242,13 @@ export class SceneLightMgr  {
             } else if (i + 1 < posList.length){
                 let pos2 = this.worldToUV(posList[i+1]);
                 arr.push(this.getVec4(pos1.x, pos1.y, pos2.x, pos2.y));
+                this.cacheVec2(pos2);
                 i++;
             } else {
                 arr.push(this.getVec4(pos1.x, pos1.y));
                 i++;
             }
+            this.cacheVec2(pos1);
         }
         this.occluderList[uuid] = arr;
         
@@ -282,15 +288,17 @@ export class SceneLightMgr  {
                     }
                 }
             }
-            newArr.push(new cc.Vec4(-1)); // 避免因为节点隐藏导致计算还保留之前的值
+            const endV = this.getVec4(-1);
+            newArr.push(endV); // 避免因为节点隐藏导致计算还保留之前的值
             this.material.setProperty("occluders", this.vecArr2FloatArr(newArr));
+            this.cacheVec4(endV);
         }
     }
     //#endregion 遮挡物部分
 
     //#region Vec4 cache
     private static _vec4Cache: cc.Vec4[] = [];
-    private static getVec4(x?: number, y?: number, z?: number, w?: number): cc.Vec4 {
+    private static getVec4(x?: number, y: number = 0, z: number = 0, w: number = 0): cc.Vec4 {
         if (this._vec4Cache.length > 0) {
             let vec4 = this._vec4Cache.pop();
             vec4.x = x; vec4.y = y; vec4.z = z; vec4.w = w;
@@ -310,7 +318,7 @@ export class SceneLightMgr  {
 
     //#region Vec2 cache
     private static _vec2Cache: cc.Vec2[] = [];
-    private static getVec2(x?: number, y?: number): cc.Vec2 {
+    private static getVec2(x?: number, y: number = 0): cc.Vec2 {
         if (this._vec2Cache.length > 0) {
             let vec2 = this._vec2Cache.pop();
             vec2.x = x; vec2.y = y;
@@ -505,6 +513,7 @@ export class SceneLightMgr  {
         const posLen2 = posLen - 1;
         let vertices: Float32Array = new Float32Array(posLen*3);
         let indices: Uint16Array = new Uint16Array((posLen - 1) * 3);
+        let a = "";
         for (let i = 0; i < posLen; i++) {
             const id = i * 3;
             vertices[id] = posList[i].x;
@@ -514,11 +523,17 @@ export class SceneLightMgr  {
                 indices[id] = i;
                 indices[id + 1] = (i + 1) % posLen2;
                 indices[id + 2] = posLen2;
+                a += `${i}=${indices[id]}-${indices[id+1]}-${indices[id+2]}\n`
             }
         }
         
         // @ts-ignore
         let gfx = cc.gfx;
+        var vfmtPosColor = new gfx.VertexFormat([
+            {name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3},
+        ]);
+        lightMesh.mesh.init(vfmtPosColor, 8, true);
+        // !!! 上面重新初始化， 怀疑现在有顶点数量变化过大导致异常
         lightMesh.mesh.setVertices(gfx.ATTR_POSITION, vertices);
         lightMesh.mesh.setIndices(indices);
     }
@@ -632,7 +647,7 @@ export class SceneLightMgr  {
     }
 
     private static _r2d: number = 180 / Math.PI;
-    private static _rDirStep: number = 120;
+    private static _rDirStep: number = 10;
     private static readonly _rDirectList: {dir: cc.Vec2, angle: number}[] = [];
     // 初始射线方向列表
     private static _initRDirectList() {
