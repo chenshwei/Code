@@ -24,10 +24,10 @@
             "_value": false
           },
           "3d": {
-            "_value": false
+            "_value": true
           },
           "meshopt": {
-            "_value": false
+            "_value": true
           },
           "2d": {
             "_value": true
@@ -193,6 +193,7 @@
         "flags": {},
         "includeModules": [
           "2d",
+          "3d",
           "affine-transform",
           "animation",
           "base",
@@ -202,6 +203,7 @@
           "graphics",
           "intersection-2d",
           "mask",
+          "meshopt",
           "physics-2d-builtin",
           "profiler",
           "rich-text",
