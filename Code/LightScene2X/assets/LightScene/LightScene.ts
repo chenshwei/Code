@@ -57,27 +57,6 @@ export class LightScene extends cc.Component {
 
         SceneLightMgr.initMat(mat);
         this.topSprite.node.setContentSize(cc.winSize.width, cc.winSize.height);
-
-        // 以下代码为测试2.x 生成mesh~
-        //@ts-ignore
-        // let gfx = cc.gfx;
-        // const node: cc.Node = new cc.Node("======");
-        // node.setParent(this.node.parent);
-        // let renderer: cc.MeshRenderer = node.addComponent(cc.MeshRenderer);
-        // renderer.receiveShadows = false;
-        // renderer.setMaterial(0, this.meshMat);
-        // const sss = 200;
-        // let mats = renderer.getMaterial(0)
-        // mats.setProperty('radius', sss/2);
-        // mats.setProperty('outlen', sss/3);
-        // var vfmtPosColor = new gfx.VertexFormat([
-        //     {name: gfx.ATTR_POSITION, type: gfx.ATTR_TYPE_FLOAT32, num: 3},
-        // ]);
-        // let mesh = new cc.Mesh();
-        // mesh.init(vfmtPosColor, 8, true);
-        // mesh.setVertices(gfx.ATTR_POSITION, [cc.v3(-sss, sss, 0), cc.v3(-sss, -sss, 0), cc.v3(sss, sss, 0), cc.v3(sss, -sss, 0),]);
-        // mesh.setIndices([0, 1, 2, 1, 3, 2,]);
-        // renderer.mesh = mesh;
     }
 }
 
