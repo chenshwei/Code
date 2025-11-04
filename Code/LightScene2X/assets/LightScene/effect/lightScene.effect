@@ -163,7 +163,7 @@ CCProgram fs %{
     col *= v_color;
 
     for (int c_i = 0; c_i < light_max_num; c_i++) {
-      if (lights[c_i].x <= -1.0) {
+      if (lights[c_i].x <= -1.0 && lights[c_i].z <= -1.0) {
         break;
       }
 
