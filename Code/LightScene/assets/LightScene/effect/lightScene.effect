@@ -20,7 +20,7 @@ techniques:
           cullMode: none
         properties:
           wh_ratio: { value: 2.22222 }
-          lights: { value: [-1, 0.5, 0.1, 0.05]}
+          lights: { value: [-1, 0.5, -1, 0.05]}
           lightSectors: { value: [-1, 0.5, 0.1, 0.05]}
           occluders: { value: [0.0, 0.0, 0.0, 0.0]}
           lightShadow: { value: [0.0, 0.0, 0.0, 0.0]}
@@ -189,7 +189,7 @@ vec4 frag() {
   vec4 vS1;
   vec4 vS2;
   for (int c_i = 0; c_i < lightSector_max_num; c_i+=2) {
-    if (lightSectors[c_i].x <= -1.0) {
+    if (lightSectors[c_i].x <= -1.0 && lightSectors[c_i].z <= -1.0) {
       break;
     }
     vS1 = lightSectors[c_i];

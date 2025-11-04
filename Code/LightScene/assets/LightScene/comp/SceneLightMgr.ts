@@ -144,7 +144,7 @@ export class SceneLightMgr  {
                     shadowArr.push(this.lightShadow[key]);  
                 }
             }
-            const endV = this.getVec4(-1);
+            const endV = this.getVec4(-1,-1,-1,-1);
             newArr.push(endV);
             
             // this.material.setProperty("lights", newArr);
